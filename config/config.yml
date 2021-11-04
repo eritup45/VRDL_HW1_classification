@@ -1,0 +1,29 @@
+MODEL:
+  OUTPUT_PATH: "./weights/"
+  RESUME_PATH: "./weights/effb1_R2_ep13_vloss1.989_LR0.0003.pth"
+  FINAL_MODEL_PATH: "./weights/effb1_s_rand13/effb1_R2_ep20_vloss1.922_LR4.5e-06.pth"
+  LR: 0.00005
+  EPOCH: 80
+
+DATA:
+  RESIZE: [224, 224]
+  DEGREES: 359
+  TRANSLATE: 0.2 # Shift img_width * 0.2
+  TRAIN_BATCH_SIZE: 40
+  TEST_BATCH_SIZE: 1
+  VALIDATION_PROPORTION: 0.2
+  NUM_CLASS: 200
+  NUM_WORKERS: 4
+  RAND_N: 2
+  RAND_M: 13
+
+PATH:
+  TRAIN_SET: "./data/train"
+  TEST_SET: "./data/test"
+  TRAIN_ANNOTATION: "./data/training_labels.txt"
+  TEST_ANNOTATION: "./data/testing_img_order.txt"
+
+
+DEVICE:
+  GPU: 0
+  CUDA: True

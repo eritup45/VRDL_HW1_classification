@@ -5,9 +5,38 @@ import torchvision
 from torch.autograd import Variable
 from torchvision import transforms, models
 import torch.nn.functional as F
+from PIL import Image
+
 from model import *
 from Resnet import *
 
+class Smooth_CELoss(nn.Module):
+    ''' Cross Entropy Loss with label smoothing '''
+    def __init__(self, class_num, label_smooth=0.1):
+        super().__init__()
+        self.label_smooth = label_smooth
+        self.class_num = class_num
+
+    def forward(self, pred, target):
+        ''' 
+        Args:
+            pred: prediction of model output    [N, M]
+            target: ground truth of sampler [N]
+        '''
+        eps = 1e-12
+        if self.label_smooth is not None:
+            # cross entropy loss with label smoothing
+            logprobs = F.log_softmax(pred, dim=1)	# softmax + log
+            target = F.one_hot(target, self.class_num)	# one-hot
+            
+            # label smoothing
+            # target = (1.0-self.label_smooth)*target + self.label_smooth/self.class_num 	
+            target = torch.clamp(target.float(), min=self.label_smooth/(self.class_num-1), max=1.0-self.label_smooth)
+            loss = -1*torch.sum(target*logprobs, 1)
+        else:
+            # standard cross entropy loss
+            loss = -1.*pred.gather(1, target.unsqueeze(-1)) + torch.log(torch.exp(pred+eps).sum(dim=1))
+        return loss.mean()
 
 def cosine_anneal_schedule(t, nb_epoch, lr):
     cos_inner = np.pi * (t % (nb_epoch))  # t - 1 is used when t has 1-based indexing.
@@ -66,38 +95,39 @@ def test(net, criterion, batch_size):
     correct_com = 0
     total = 0
     idx = 0
-    device = torch.device("cuda:0,1")
+    device = torch.device("cuda:0")
 
     transform_test = transforms.Compose([
-        transforms.Scale((550, 550)),
+        transforms.Resize((550, 550), Image.BILINEAR),
         transforms.CenterCrop(448),
         transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
     ])
-    testset = torchvision.datasets.ImageFolder(root='./bird/test',
+    testset = torchvision.datasets.ImageFolder(root='./data/train_valid/val',
                                                transform=transform_test)
     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=True, num_workers=4)
 
-    for batch_idx, (inputs, targets) in enumerate(testloader):
-        idx = batch_idx
-        if use_cuda:
+    is_train = False
+    with torch.set_grad_enabled(is_train):
+        for batch_idx, (inputs, targets) in enumerate(testloader):
+            idx = batch_idx
             inputs, targets = inputs.to(device), targets.to(device)
-        inputs, targets = Variable(inputs, volatile=True), Variable(targets)
-        output_1, output_2, output_3, output_concat= net(inputs)
-        outputs_com = output_1 + output_2 + output_3 + output_concat
+            # inputs, targets = Variable(inputs, volatile=True), Variable(targets)
+            output_1, output_2, output_3, output_concat= net(inputs)
+            outputs_com = output_1 + output_2 + output_3 + output_concat
 
-        loss = criterion(output_concat, targets)
+            loss = criterion(output_concat, targets)
 
-        test_loss += loss.item()
-        _, predicted = torch.max(output_concat.data, 1)
-        _, predicted_com = torch.max(outputs_com.data, 1)
-        total += targets.size(0)
-        correct += predicted.eq(targets.data).cpu().sum()
-        correct_com += predicted_com.eq(targets.data).cpu().sum()
+            test_loss += loss.item()
+            _, predicted = torch.max(output_concat.data, 1)
+            _, predicted_com = torch.max(outputs_com.data, 1)
+            total += targets.size(0)
+            correct += predicted.eq(targets.data).cpu().sum()
+            correct_com += predicted_com.eq(targets.data).cpu().sum()
 
-        if batch_idx % 50 == 0:
-            print('Step: %d | Loss: %.3f | Acc: %.3f%% (%d/%d) |Combined Acc: %.3f%% (%d/%d)' % (
-            batch_idx, test_loss / (batch_idx + 1), 100. * float(correct) / total, correct, total, 100. * float(correct_com) / total, correct_com, total))
+            if batch_idx % 50 == 0:
+                print('(Test) Step: %d | Loss: %.3f | Acc: %.3f%% (%d/%d) |Combined Acc: %.3f%% (%d/%d)' % (
+                batch_idx, test_loss / (batch_idx + 1), 100. * float(correct) / total, correct, total, 100. * float(correct_com) / total, correct_com, total))
 
     test_acc = 100. * float(correct) / total
     test_acc_en = 100. * float(correct_com) / total

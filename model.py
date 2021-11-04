@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch
     
-
+# (resnet50, 512, 200)
 class PMG(nn.Module):
     def __init__(self, model, feature_size, classes_num):
         super(PMG, self).__init__()
