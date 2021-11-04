@@ -1,22 +1,21 @@
 # VRDL_HW1_Fine-Grained_classification
 
 ### Requirement
- 
-python 3.6
 
-PyTorch >= 1.3.1
-
-torchvision >= 0.4.2
-
-* conda create environment from file.
+1. conda create environment from file.
 ```bash
 conda env create -f environment.yml
+conda activate TransFG
 ```
+> May show some error. Just ignore them.
 
-* pip install requirements.
-```bash
-pip install -r requirements.txt
-```
+2. install pytorch correspond to your cuda version.
+
+python 3.7
+
+PyTorch >= 1.5.1
+
+torchvision >= 0.6.1
 
 > Use cuda:0 as default
 
@@ -66,6 +65,8 @@ python train.py
 ```
 
 ### Testing
+Put pretrained model in the path: 
+"./ckpt/ep5_vloss1.990_vacc81.8_vac81.7.pth"
 
 ```bash
 python inference.py
@@ -83,8 +84,7 @@ Rank: 34/99
 
 
 ### Report
-https://hackmd.io/o-cz5Z65TySKpGFF47usBA?view
-
+https://hackmd.io/@Bmj6Z_QbTMy769jUvLGShA/rkvDPxE7_
 
 ### Reference
 [Progressive Multi-Granularity Training](https://github.com/PRIS-CV/PMG-Progressive-Multi-Granularity-Training)
