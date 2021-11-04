@@ -1,28 +1,28 @@
-# from .transforms              import build_train_transform, build_test_transform
-# from .rand_transforms              import build_train_transform, build_test_transform
-from torchvision              import datasets
-from torch.utils.data         import Dataset, DataLoader
+from torchvision import datasets
+from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 import torch
 from torchvision import transforms
-
-
 import numpy as np
 import os
 from PIL import Image
 
-def find_images_and_labels(annotations_file, img_dir, classes_file = './data/classes.txt', is_train=False):
+
+def find_images_and_labels(
+        annotations_file, img_dir,
+        classes_file='./data/classes.txt', is_train=False):
     """
-        Description: 
+        Description:
         Find images and labels from the following data.
         Labels file specify which data is training (testing) data.
         And A file specify how many class is in the data.
 
-        Args: 
-        annotations_file: Labels of training (testing) data. (Ex. './data/training_labels.txt')
+        Args:
+        annotations_file: Labels of training (testing) data.
+            (Ex. './data/training_labels.txt')
         img_dir: Images stored in. (Ex. './data/train')
 
-        Return: 
+        Return:
         images_and_labels: (images, labels)
         class_to_idx.keys(): names of class
         class_to_idx: dict() of classes
@@ -36,7 +36,7 @@ def find_images_and_labels(annotations_file, img_dir, classes_file = './data/cla
 
     # Convert classes to idx
     for idx, c in enumerate(classes):
-        class_to_idx[c.split()[0]] = idx 
+        class_to_idx[c.split()[0]] = idx
 
     if is_train:
         for line in img_txt_file:
@@ -48,7 +48,7 @@ def find_images_and_labels(annotations_file, img_dir, classes_file = './data/cla
             # labels (converted to numerical)
             label_list.append(line[:-1].split(' ')[-1])
         labels = [class_to_idx[l] for l in label_list]
-    if not is_train: 
+    if not is_train:
         for line in img_txt_file:
             # images path
             filename = line[:-1]
@@ -60,16 +60,19 @@ def find_images_and_labels(annotations_file, img_dir, classes_file = './data/cla
 
     return img_path_list, labels, class_to_idx.keys(), class_to_idx
 
+
 class CustomImageDataset(Dataset):
-    def __init__(self, annotations_file, img_dir, 
-    classes_file = './data/classes.txt', transform=None, is_train=False):
-        imgs, labels, _, _ = find_images_and_labels(annotations_file, img_dir, 
-            classes_file=classes_file, is_train=is_train)
+    def __init__(self, annotations_file, img_dir,
+                 classes_file='./data/classes.txt',
+                 transform=None, is_train=False):
+        imgs, labels, _, _ = find_images_and_labels(annotations_file, img_dir,
+                                                    classes_file=classes_file,
+                                                    is_train=is_train)
         self.img_dir = img_dir
         self.transform = transform
         self.imgs = imgs
         self.labels = labels
-        
+
     def __len__(self):
         return len(self.imgs)
 
@@ -80,49 +83,26 @@ class CustomImageDataset(Dataset):
             img = self.transform(img)
         return img, label
 
+
 def make_test_loader():
     num_workers = 4
-    batch_size  = 1
-    test_path   = './data/testing_images'
+    batch_size = 1
+    test_path = './data/testing_images'
     test_annotation = './data/testing_img_order.txt'
     transform_test = transforms.Compose([
         transforms.Resize((550, 550), Image.BILINEAR),
         transforms.CenterCrop(448),
         transforms.ToTensor(),
-        # transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]), # TransFG
         # transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]), # PMG
-        transforms.Normalize([0.478, 0.493, 0.426], [0.188, 0.187, 0.200]), # train+test
+        transforms.Normalize(
+            [0.478, 0.493, 0.426],
+            [0.188, 0.187, 0.200]),  # train+test
     ])
-    testset = CustomImageDataset(test_annotation, test_path, transform=transform_test)
-    test_loader = DataLoader(testset, batch_size=batch_size, num_workers=num_workers)
+    testset = CustomImageDataset(
+        test_annotation, test_path, transform=transform_test)
+    test_loader = DataLoader(
+        testset, batch_size=batch_size, num_workers=num_workers)
     return test_loader
-
-
-# def make_train_loader(cfg):
-#     num_workers = cfg.DATA.NUM_WORKERS
-#     batch_size  = cfg.DATA.TRAIN_BATCH_SIZE
-#     valid_proportion  = cfg.DATA.VALIDATION_PROPORTION
-#     train_path  = cfg.PATH.TRAIN_SET
-#     train_annotation = cfg.PATH.TRAIN_ANNOTATION
-#     transforms = build_train_transform(cfg)
-
-#     trainset = CustomImageDataset(train_annotation, train_path, transform=transforms, is_train=True)
-    
-#     # dataset were splitted in 80 % /20 % for train data and validation data seperately.
-#     num_train = len(trainset)
-#     indices = list(range(num_train))
-#     split = int(np.floor(valid_proportion * num_train))
-
-#     np.random.shuffle(indices)
-#     train_idx, valid_idx = indices[split:], indices[:split]
-#     train_sampler = SubsetRandomSampler(train_idx)
-#     valid_sampler = SubsetRandomSampler(valid_idx)
-
-#     # If your validation and train data are splitted already, just do
-#     train_loader = DataLoader(trainset, batch_size=batch_size, num_workers=num_workers, sampler=train_sampler)
-#     valid_loader = DataLoader(trainset, batch_size=batch_size, num_workers=num_workers, sampler=valid_sampler)
-    
-#     return train_loader, valid_loader
 
 if __name__ == '__main__':
     from torchvision import transforms
@@ -131,16 +111,18 @@ if __name__ == '__main__':
     ])
 
     num_workers = 4
-    batch_size  = 1
-    test_path   = "../data/test"
-    train_path   = "../data/train"
+    batch_size = 1
+    test_path = "../data/test"
+    train_path = "../data/train"
     test_annotation = "../data/testing_img_order.txt"
     train_annotation = "../data/training_labels.txt"
 
-    trainset = CustomImageDataset(train_annotation, train_path, classes_file = '../data/classes.txt', is_train=True, transform=transform)
-    test_loader = DataLoader(trainset, batch_size=batch_size, num_workers=num_workers)
-    # testset = CustomImageDataset(test_annotation, test_path, classes_file = '../data/classes.txt', transform=transform)
-    # test_loader = DataLoader(testset, batch_size=batch_size, num_workers=num_workers)
+    trainset = CustomImageDataset(
+        train_annotation, train_path, classes_file='../data/classes.txt',
+        is_train=True, transform=transform)
+    test_loader = DataLoader(
+        trainset, batch_size=batch_size, num_workers=num_workers)
+
     for data, target in test_loader:
         print('data: ', data)
         print('data.size(0): ', data.size(0))

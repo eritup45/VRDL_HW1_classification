@@ -14,7 +14,7 @@ from tqdm import tqdm
 from typing import Any, Callable, cast, Dict, List, Optional, Tuple
 
 from utils import *
-# from utils import cosine_anneal_schedule, load_model, model_info, jigsaw_generator, test
+# from utils import cosine_anneal_schedule, load_model, jigsaw_generator, test
 
 from datasets import make_test_loader
 
@@ -23,7 +23,8 @@ def main():
     # submission
     submission = []
     with open('./data/testing_img_order.txt') as f:
-        test_images = [x.strip() for x in f.readlines()]  # all the testing images
+        # all the testing images
+        test_images = [x.strip() for x in f.readlines()]
 
     # dictionary of label
     classes, class_to_idx = find_classes('./data/train_valid/train/')
@@ -47,8 +48,11 @@ def main():
     #     transforms.ToTensor(),
     #     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
     # ])
-    # testset = torchvision.datasets.ImageFolder(root='./data/test/', transform=transform_test)
-    # testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=4)
+    # testset = torchvision.datasets.ImageFolder(
+    #     root='./data/test/',
+    #     transform=transform_test)
+    # testloader = torch.utils.data.DataLoader(
+    #     testset, batch_size=batch_size, shuffle=False, num_workers=4)
 
     with torch.no_grad():
         epoch_iterator = tqdm(testloader)
@@ -64,8 +68,11 @@ def main():
             ans = list(class_to_idx.keys())[list(class_to_idx.values()).index(predicted.item())]
             submission.append([test_images[idx], ans])
 
-            if idx <= 30 or idx >= 3030:
-                print(f'idx: {idx}. predicted.item(): {predicted.item()}. submit = [test_images[idx]: {test_images[idx]}, ans: {ans}] )')
+            if idx <= 5 or idx >= 3030:
+                print(
+                    f'idx: {idx}. predicted.item(): {predicted.item()}. ' +
+                    f'submit=[test_images[idx]: ' +
+                    f'{test_images[idx]}, ans:{ans}]')
 
     np.savetxt('answer.txt', submission, fmt='%s')
 
@@ -74,9 +81,8 @@ def find_classes(directory: str) -> Tuple[List[str], Dict[str, int]]:
     """Finds the class folders in a dataset.
     See :class:`DatasetFolder` for details.
     """
-    classes = sorted(entry.name for entry in os.scandir(directory) if entry.is_dir())
-    if not classes:
-        raise FileNotFoundError(f"Couldn't find any class folder in {directory}.")
+    classes = sorted(
+        entry.name for entry in os.scandir(directory) if entry.is_dir())
 
     class_to_idx = {cls_name: i for i, cls_name in enumerate(classes)}
     # print('class_to_idx: ', class_to_idx)
