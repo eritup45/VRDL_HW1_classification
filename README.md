@@ -1,8 +1,5 @@
 # VRDL_HW1_Fine-Grained_classification
 
-### Methods
-[Progressive Multi-Granularity Training](https://github.com/PRIS-CV/PMG-Progressive-Multi-Granularity-Training)
- 
 ### Requirement
  
 python 3.6
@@ -81,10 +78,14 @@ https://drive.google.com/drive/folders/1vzr_gRZri9kDt7Rbq8gBt1N9M5J46v_9?usp=sha
 
 ### Results
 Test score: 0.76624
+Rank: 34/99
 ![](https://i.imgur.com/dbRHjo8.png)
 
 
+### Report
+https://hackmd.io/o-cz5Z65TySKpGFF47usBA?view
+
 
 ### Reference
+[Progressive Multi-Granularity Training](https://github.com/PRIS-CV/PMG-Progressive-Multi-Granularity-Training)
 
-https://github.com/PRIS-CV/PMG-Progressive-Multi-Granularity-Training
