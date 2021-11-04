@@ -1,8 +1,7 @@
-# VRDL_HW1_classification
+# VRDL_HW1_Fine-Grained_classification
 
-# Progressive Multi-Granularity Training
- 
-Code release for Fine-Grained Visual Classiﬁcation via Progressive Multi-Granularity Training of Jigsaw Patches (ECCV2020)
+### Methods
+[Progressive Multi-Granularity Training](https://github.com/PRIS-CV/PMG-Progressive-Multi-Granularity-Training)
  
 ### Requirement
  
@@ -12,11 +11,24 @@ PyTorch >= 1.3.1
 
 torchvision >= 0.4.2
 
+* conda create environment from file.
+```bash
+conda env create -f environment.yml
+```
+
+* pip install requirements.
+```bash
+pip install -r requirements.txt
+```
+
 > Use cuda:0 as default
 
-### Training
+### Data preparation
 
-1. Download datatsets and organize the structure as follows:
+1. Download datatsets 
+https://drive.google.com/drive/folders/1vzr_gRZri9kDt7Rbq8gBt1N9M5J46v_9?usp=sharing
+
+2. organize the structure as follows:
 ```
 data
 ├── train_valid
@@ -47,7 +59,11 @@ data
         └── ...
 ```
 
-2. Train from scratch: 
+> In google drive, data has been categorized as above format.
+
+### Training
+
+Train and validate: 
 ```bash
 python train.py
 ```
@@ -58,14 +74,13 @@ python train.py
 python inference.py
 ```
 
-> The results will be saved in ./answer.txt
-
 ### Pretrained model
 
 ep5_vloss1.990_vacc81.8_vac81.7.pth
-
+https://drive.google.com/drive/folders/1vzr_gRZri9kDt7Rbq8gBt1N9M5J46v_9?usp=sharing
 
 ### Results
+Test score: 0.76624
 ![](https://i.imgur.com/dbRHjo8.png)
 
 
