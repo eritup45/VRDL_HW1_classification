@@ -1,5 +1,8 @@
 # VRDL_HW1_Fine-Grained_classification
 
+### Objective
+Classify 200 bird species. 
+
 ### Requirement
 
 1. conda create environment from file.
@@ -84,7 +87,7 @@ Rank: 34/99
 
 
 ### Report
-https://hackmd.io/@Bmj6Z_QbTMy769jUvLGShA/rkvDPxE7_
+https://hackmd.io/@Bmj6Z_QbTMy769jUvLGShA/VRDLHW1
 
 ### Reference
 [Progressive Multi-Granularity Training](https://github.com/PRIS-CV/PMG-Progressive-Multi-Granularity-Training)
